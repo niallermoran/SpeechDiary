@@ -39,6 +39,10 @@ jobs:
         replace-with: '-'
         flags: 'g'
         
+      env:
+        TIME: "${{ steps.current-time.outputs.time }}"
+        run: echo $TIME
+        
                 
     - name: azure-blob-copy-action
       # You may pin to the exact commit or the version.
