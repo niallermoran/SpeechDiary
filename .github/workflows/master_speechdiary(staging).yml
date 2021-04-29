@@ -1,6 +1,5 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Node.js app to Azure Web App - speechdiary(staging)
 
 on:
@@ -26,31 +25,32 @@ jobs:
       run: |
         npm install
         npm run build --if-present
+        
+    - name: Get timestamp
+      uses: gerred/actions/current-time@master
+      id: current-time
 
-    - name: Upload artifact for deployment job
-      uses: actions/upload-artifact@v2
+    - name: Run string replace
+      uses: frabert/replace-string-action@master
+      id: format-time
       with:
-        name: node-app
-        path: .
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'staging'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
-    steps:
-    - name: Download artifact from build job
-      uses: actions/download-artifact@v2
+        pattern: '[:\.]+'
+        string: "${{ steps.current-time.outputs.time }}"
+        replace-with: '-'
+        flags: 'g'
+        
+                
+    - name: azure-blob-copy-action
+      # You may pin to the exact commit or the version.
+      # uses: ulaval/azure-blob-copy-action@a5589c66042be9a15da7cc2a28e63adc3a42af3a
+      uses: ulaval/azure-blob-copy-action@v1
       with:
-        name: node-app
+        # Azure Blob Storage connection string
+        connection_string: DefaultEndpointsProtocol=https;AccountName=speechdiarybuilds;AccountKey=ZSaiwNZpWfFRkf9EV0aNwl6VklFJMvqRDWj+jLzy1vLhdo478bJZ8VlIUE8q2YX7HMS/LOTyTxhBlI8KIo0FSA==;EndpointSuffix=core.windows.net
+        
+        # Azure Blob Storage container name
+        container_name: builds
+        
 
-    - name: 'Deploy to Azure Web App'
-      id: deploy-to-webapp
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: 'speechdiary'
-        slot-name: 'staging'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_b150bbba944b4874a0c934bd9ab7487a }}
-        package: .
+
+    
