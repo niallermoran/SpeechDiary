@@ -1,14 +1,10 @@
-import logo from './logo.svg';
 import React, { Component } from 'react';
-import bootstrap from 'bootstrap'
 import { Container } from 'reactstrap';
 import './App.css';
-import { getAzureTokenOrRefresh } from './azure_util';
 import { ResultReason } from 'microsoft-cognitiveservices-speech-sdk';
 const speechsdk = require('microsoft-cognitiveservices-speech-sdk');
-const textsdk = require('@azure/ai-text-analytics');
 
-const { TextAnalyticsClient, AzureKeyCredential } = require("@azure/ai-text-analytics");
+//const { TextAnalyticsClient, AzureKeyCredential } = require("@azure/ai-text-analytics");
 export default class SpeechDiaryComponent extends Component {
   constructor(props) {
 
@@ -41,15 +37,14 @@ export default class SpeechDiaryComponent extends Component {
       if (senresult.error === undefined) {
         const pos = senresult.confidenceScores.positive;
         const neg = senresult.confidenceScores.negative;
-        const neut = senresult.confidenceScores.neutral;
         var score = 0;
 
         this.setState({ moodScore: score * 100 });
-        if (senresult.sentiment == "negative") {
+        if (senresult.sentiment === "negative") {
           this.setState({ moodScore: (100 - (neg * 100)) });
           this.setState({ isSad: true });
         }
-        else if (senresult.sentiment == "positive") {
+        else if (senresult.sentiment === "positive") {
           this.setState({ moodScore: pos * 100 });
           this.state.isHappy = true;
           this.setState({ isNeutral: true });
@@ -118,8 +113,7 @@ export default class SpeechDiaryComponent extends Component {
         displayText = `Oops, speech was cancelled or could not be recognized. Ensure your microphone is working properly. ${result.reason}`;
       }
 
-      this.
-        setState({
+      this.setState({
           displayText: displayText,
           speechText: speechText
         });
