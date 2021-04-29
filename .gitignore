@@ -1,0 +1,8 @@
+Server/.env
+client/build
+client/node_modules
+server/node_modules
+server/public
+Server/.vscode
+Client/.vscode
+Server/.deployment
