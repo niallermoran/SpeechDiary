@@ -22,8 +22,8 @@ jobs:
         node-version: '12.x'
 
     - name: npm install, build, and test client
+      working-directory: Client
       run: |
-        cd Client
         npm install
         npm run build --if-present
         npm run test --if-present
