@@ -54,6 +54,7 @@ jobs:
         container_name: 'builds'
         # The name of the directory you want to upload
         source_dir: 'client/build/'
+        sync: false
      
                 
 
