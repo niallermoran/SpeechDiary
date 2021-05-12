@@ -31,8 +31,10 @@ The client application is a single page dynamic web application built using REAC
 1. Open the contents of the client folder in VS code.
 2. In a terminal window in VS code type npm install to download all required packages.
 3. Open the file 'package.json' and at the bottom change the proxy url to include the correct port as defined in the previous section, e.g. 3400. This will tell the REACT app where to go for server side calls. This will only be needed for development work.
-4. In a terminal npm run start. This will run an express web server and launch localhost:3000 with the client app working. Ensure that the server app is running from the previous section. This will mean having two instances of VS Code running.
-5. Test the application by clicking the microphone and allowing your browser to access your mic. Say a sentence and ensure the text is recognised and a mood score given.
+4. Copy the file sample.env to a new file called .env. Ensure that the new file (.env) is added to your git ignore file list and do not update sample.env.
+5. Open the file .env and update the properties. Please navigate to https://developers.google.com/identity/sign-in/web/sign-in to create a Google App to add Google sign-in capability
+6. In a terminal npm run start. This will run an express web server and launch localhost:3000 with the client app working. Ensure that the server app is running from the previous section. This will mean having two instances of VS Code running.
+7. Test the application by clicking the microphone and allowing your browser to access your mic. Say a sentence and ensure the text is recognised and a mood score given.
 
 ## Deploying the App to Azure
 
