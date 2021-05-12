@@ -2,9 +2,12 @@ import React, { Component } from 'react';
 import { Container } from 'reactstrap';
 import './App.css';
 import { ResultReason } from 'microsoft-cognitiveservices-speech-sdk';
-const speechsdk = require('microsoft-cognitiveservices-speech-sdk');
+import GoogleLogin from 'react-google-login'; // see https://www.npmjs.com/package/react-google-login
+import { GoogleLogout } from 'react-google-login';
 
-//const { TextAnalyticsClient, AzureKeyCredential } = require("@azure/ai-text-analytics");
+const speechsdk = require('microsoft-cognitiveservices-speech-sdk');
+const google_client_id = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
 export default class SpeechDiaryComponent extends Component {
   constructor(props) {
 
@@ -12,6 +15,8 @@ export default class SpeechDiaryComponent extends Component {
 
     this.state = {
       displayText: 'Click the green mic to record your symptoms',
+      loggedIn: false,
+      name: null,
       speechText: '',
       isHappy: false,
       isNeutral: false,
@@ -20,6 +25,7 @@ export default class SpeechDiaryComponent extends Component {
       moodScore: null
     }
   }
+
 
   async extractPhrasesandandSentimentFromSpeech(text) {
 
@@ -63,9 +69,9 @@ export default class SpeechDiaryComponent extends Component {
     const phraseresults = await response.json();
     const array = [];
     for (const phraseresult of phraseresults) {
-        for (const phrase of phraseresult.keyPhrases) {
-            array.push(phrase);
-        }
+      for (const phrase of phraseresult.keyPhrases) {
+        array.push(phrase);
+      }
     }
 
     this.setState({ keyphrases: array });
@@ -114,9 +120,9 @@ export default class SpeechDiaryComponent extends Component {
       }
 
       this.setState({
-          displayText: displayText,
-          speechText: speechText
-        });
+        displayText: displayText,
+        speechText: speechText
+      });
     });
 
   }
@@ -125,17 +131,37 @@ export default class SpeechDiaryComponent extends Component {
     const phrases = this.state.keyphrases;
 
     if (phrases != null) {
-        return (
-            <div>
-                {
-                    phrases.map(((phrase) => (
-                        <p>{phrase}</p>
-                    )))
-                }
-            </div>
-        );
+      return (
+        <div>
+          {
+            phrases.map(((phrase) => (
+              <p>{phrase}</p>
+            )))
+          }
+        </div>
+      );
     }
-}
+  }
+
+  // when the user logs in we need to deal with the response
+  responseGoogleSuccess = (response) => {
+    this.setState({ loggedIn: true });
+    this.setState({ name: response.profileObj.givenName });
+    console.log(response);
+  }
+
+  responseGoogleFailed = (response) => {
+    this.setState({ loggedIn: false });
+    this.setState({ name: null });
+    console.log('failed to logged_in: ' + response.details);
+  }
+
+  responseGoogleLogout = (response) => {
+    this.setState({ loggedIn: false });
+    this.setState({ name: null });
+    console.log(response);
+  }
+
 
   render() {
 
@@ -153,11 +179,42 @@ export default class SpeechDiaryComponent extends Component {
               </div>
             </div>
 
+
             <div className="text-center">
               <div >
                 {this.state.displayText}
               </div>
             </div>
+
+
+            {
+              this.state.name ?
+                <div className="text-center">
+                  <div >
+                    Hi {this.state.name}!
+              </div>
+                </div> : null}
+
+            {
+              this.state.loggedIn ?
+                <GoogleLogout
+                  clientId={google_client_id}
+                  buttonText="Logout"
+                  isSignedIn="false"
+                  onLogoutSuccess={this.responseGoogleLogout}
+                /> :
+
+                <GoogleLogin
+                  clientId={google_client_id}
+                  buttonText="Login with Google"
+                  loginHint="Login using your Google account to save diary entries"
+                  isSignedIn="true"
+                  theme="blue"
+                  onSuccess={this.responseGoogleSuccess}
+                  onFailure={this.responseGoogleFailed}
+                  cookiePolicy={'single_host_origin'}
+                />
+            }
 
             <div class="w-100 mx-auto">
               <div className="output-display rounded" >

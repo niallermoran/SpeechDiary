@@ -6,3 +6,4 @@ server/public
 Server/.vscode
 Client/.vscode
 Server/.deployment
+Client/.env
