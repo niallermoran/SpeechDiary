@@ -196,7 +196,7 @@ export default class SpeechDiaryComponent extends Component {
                 </div> : null}
 
             {
-              this.state.google_client_id ? (
+            
               this.state.loggedIn ?
                 <GoogleLogout
                   clientId={google_client_id}
@@ -214,9 +214,7 @@ export default class SpeechDiaryComponent extends Component {
                   onSuccess={this.responseGoogleSuccess}
                   onFailure={this.responseGoogleFailed}
                   cookiePolicy={'single_host_origin'}
-                /> )
-                :
-                null
+                /> 
             }
 
             <div class="w-100 mx-auto">
