@@ -11,7 +11,9 @@ The following guide will define how to load the code on your local development e
 In order to deploy the solution you will need an Azure Web App that supports node 12 on Linux. You will also need a cognitive services resource that supprts the speech sdk and text analytics.
 
 1. Create a new web app in Azure using Linux as the OS and node 12 LTS as the runtime stack.
-2. Create a cognitive services resource and take note of the region (overview tab in portal and click 'json view' to get the correct string for region/location) as well as endpoint url and key from the 'keys and endpoint' tab in the portal.
+2. Add all settings to the app using the configuration tab. Create all settings from the sample.env files in both client and server. 
+3. Make sure the setting REACT_APP_PORT is set to 8080 as this is the port Azure uses to ensure the web app container is operational.
+4. Create a cognitive services resource and take note of the region (overview tab in portal and click 'json view' to get the correct string for region/location) as well as endpoint url and key from the 'keys and endpoint' tab in the portal.
 
 ## Setting up Development Environment - Server APIs
 
