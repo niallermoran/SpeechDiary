@@ -6,6 +6,8 @@ const textsdk = require('@azure/ai-text-analytics');
 const jwt = require('jsonwebtoken');
 const { TextAnalyticsClient, AzureKeyCredential } = require("@azure/ai-text-analytics");
 
+require('dotenv').config();
+
 const port = process.env.REACT_APP_PORT || 5000; // after deploying to azure make sure there is an appsetting for port 80/443
 const key = process.env.REACT_APP_SPEECH_KEY;
 const region = process.env.REACT_APP_SPEECH_REGION;
