@@ -5,13 +5,24 @@ import { ResultReason } from 'microsoft-cognitiveservices-speech-sdk';
 import GoogleLogin from 'react-google-login'; // see https://www.npmjs.com/package/react-google-login
 import { GoogleLogout } from 'react-google-login';
 
+const jwt = require('jsonwebtoken');
 const speechsdk = require('microsoft-cognitiveservices-speech-sdk');
 const google_client_id = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+const privateKey = process.env.REACT_APP_PRIVATE_KEY;
+
+// generate an auth token before trying to access APIs
+const jwtToken = jwt.sign({ id: null }, privateKey, {
+  expiresIn: 3600 // expires in 1 hours
+});
 
 export default class SpeechDiaryComponent extends Component {
   constructor(props) {
 
     super(props);
+    this.resetState();
+  }
+
+  async resetState() {
 
     this.state = {
       displayText: 'Click the green mic to record your symptoms',
@@ -33,48 +44,88 @@ export default class SpeechDiaryComponent extends Component {
     this.state.isHappy = false;
     this.state.isSad = false;
     this.state.moodScore = null;
-
     this.setState({ keyphrases: null });
+    var response;
 
-    var response = await fetch(`/api/sentiment:${text}`);
-    const sentimentjson = await response.json();
+    try {
+      // start by getting an auth token from the API so that we can stream audio securely from the client
+      response = await fetch(`/api/sentiment:${text}`,
+        {
+          method: "GET",
+          headers: { "x-access-token": jwtToken }
+        });
+    }
+    catch (err) {
+      this.resetState();
+      this.setState({ displayText: "Opps, there was an error accessing the API, please try again!" });
+    }
 
-    for (const senresult of sentimentjson) {
-      if (senresult.error === undefined) {
-        const pos = senresult.confidenceScores.positive;
-        const neg = senresult.confidenceScores.negative;
-        var score = 0;
+    if (response.status == 401 || response.status == 500) {
+      this.resetState();
+      this.setState({ displayText: "Opps, there was an error accessing the API, please try again!" });
+    }
+    else {
+      const sentimentjson = await response.json();
 
-        this.setState({ moodScore: score * 100 });
-        if (senresult.sentiment === "negative") {
-          this.setState({ moodScore: (100 - (neg * 100)) });
-          this.setState({ isSad: true });
+      for (const senresult of sentimentjson) {
+        if (senresult.error === undefined) {
+          const pos = senresult.confidenceScores.positive;
+          const neg = senresult.confidenceScores.negative;
+          var score = 0;
+
+          this.setState({ moodScore: score * 100 });
+          if (senresult.sentiment === "negative") {
+            this.setState({ moodScore: (100 - (neg * 100)) });
+            this.setState({ isSad: true });
+          }
+          else if (senresult.sentiment === "positive") {
+            this.setState({ moodScore: pos * 100 });
+            this.state.isHappy = true;
+            this.setState({ isNeutral: true });
+          }
+          else {
+            this.setState({ isNeutral: true });
+            this.setState({ moodScore: 50 });
+          }
+        } else {
+          console.log("Encountered an error:", senresult.error);
         }
-        else if (senresult.sentiment === "positive") {
-          this.setState({ moodScore: pos * 100 });
-          this.state.isHappy = true;
-          this.setState({ isNeutral: true });
-        }
-        else {
-          this.setState({ isNeutral: true });
-          this.setState({ moodScore: 50 });
-        }
-      } else {
-        console.log("Encountered an error:", senresult.error);
       }
     }
 
-    // get phrases
-    response = await fetch(`/api/keywords:${text}`);
-    const phraseresults = await response.json();
-    const array = [];
-    for (const phraseresult of phraseresults) {
-      for (const phrase of phraseresult.keyPhrases) {
-        array.push(phrase);
-      }
+    try {
+      // start by getting an auth token from the API so that we can stream audio securely from the client
+      response = await fetch(`/api/keywords:${text}`,
+        {
+          method: "GET",
+          headers: { "x-access-token": jwtToken }
+        });
+    }
+    catch (err) {
+      this.resetState();
+      this.setState({ displayText: "Opps, there was an error accessing the API, please try again!" });
     }
 
-    this.setState({ keyphrases: array });
+    if (response.status == 401 || response.status == 500) {
+      this.resetState();
+      this.setState({ displayText: "Opps, there was an error accessing the API, please try again!" });
+    }
+    else {
+      // get phrases
+      const phraseresults = await response.json();
+      const array = [];
+      for (const phraseresult of phraseresults) {
+        if (phraseresult && phraseresult.keyPhrases && phraseresult.keyPhrases.length > 0) {
+          for (const phrase of phraseresult.keyPhrases) {
+            array.push(phrase);
+          }
+        }
+      }
+
+      this.setState({ keyphrases: array });
+    }
+
+
 
 
   }
@@ -82,48 +133,67 @@ export default class SpeechDiaryComponent extends Component {
 
   async startListening() {
 
-    // start by getting an auth token from the API
-    const response = await fetch("/api/token");
-    const body = await response.json();
-    const token = body.authToken;
-    const region = body.region;
+    var response;
 
-    const speechConfig = speechsdk.SpeechConfig.fromAuthorizationToken(token, region);
-    speechConfig.speechRecognitionLanguage = 'en-US';
-    const audioConfig = speechsdk.AudioConfig.fromDefaultMicrophoneInput();
-    const recognizer = new speechsdk.SpeechRecognizer(speechConfig, audioConfig);
+    try {
+      // start by getting an auth token from the API so that we can stream audio securely from the client
+      response = await fetch("/api/token",
+        {
+          method: "GET",
+          headers: { "x-access-token": jwtToken }
+        });
+    }
+    catch (err) {
+      this.resetState();
+      this.setState({ displayText: "Opps, there was an error accessing the API, please try again!" });
+    }
 
-    this.setState({
-      displayText: 'speak into your microphone...',
-      speechText: '',
-      isSad: false,
-      isHappy: false,
-      isNeutral: false,
-      keyphrases: null,
-      moodScore: null
-    });
+    if (response.status == 401 || response.status == 500) {
+      this.resetState();
+      this.setState({ displayText: "Opps, there was an error accessing the API, please try again!" });
+    }
+    else {
+      const body = await response.json();
+      const token = body.authToken;
+      const region = body.region;
 
-    recognizer.recognizeOnceAsync(result => {
-      let displayText;
-      let speechText;
-      if (result.reason === ResultReason.RecognizedSpeech) {
-        speechText = `${result.text}`;
-        displayText = 'Speech recognised';
-        try {
-          this.extractPhrasesandandSentimentFromSpeech(result.text);
-        }
-        catch (e) {
-          console.log(e.ResultReason);
-        }
-      } else {
-        displayText = `Oops, speech was cancelled or could not be recognized. Ensure your microphone is working properly. ${result.reason}`;
-      }
+      const speechConfig = speechsdk.SpeechConfig.fromAuthorizationToken(token, region);
+      speechConfig.speechRecognitionLanguage = 'en-US';
+      const audioConfig = speechsdk.AudioConfig.fromDefaultMicrophoneInput();
+      const recognizer = new speechsdk.SpeechRecognizer(speechConfig, audioConfig);
 
       this.setState({
-        displayText: displayText,
-        speechText: speechText
+        displayText: 'speak into your microphone...',
+        speechText: '',
+        isSad: false,
+        isHappy: false,
+        isNeutral: false,
+        keyphrases: null,
+        moodScore: null
       });
-    });
+
+      recognizer.recognizeOnceAsync(result => {
+        let displayText;
+        let speechText;
+        if (result.reason === ResultReason.RecognizedSpeech) {
+          speechText = `${result.text}`;
+          displayText = 'Speech recognised';
+          try {
+            this.extractPhrasesandandSentimentFromSpeech(result.text);
+          }
+          catch (e) {
+            console.log(e.ResultReason);
+          }
+        } else {
+          displayText = `Oops, speech was cancelled or could not be recognized. Ensure your microphone is working properly. ${result.errorDetails}`;
+        }
+
+        this.setState({
+          displayText: displayText,
+          speechText: speechText
+        });
+      });
+    }
 
   }
 
@@ -196,7 +266,7 @@ export default class SpeechDiaryComponent extends Component {
                 </div> : null}
 
             {
-            
+
               this.state.loggedIn ?
                 <GoogleLogout
                   clientId={google_client_id}
@@ -214,7 +284,7 @@ export default class SpeechDiaryComponent extends Component {
                   onSuccess={this.responseGoogleSuccess}
                   onFailure={this.responseGoogleFailed}
                   cookiePolicy={'single_host_origin'}
-                /> 
+                />
             }
 
             <div class="w-100 mx-auto">
