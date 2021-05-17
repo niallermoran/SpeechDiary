@@ -240,8 +240,8 @@ export default class SpeechDiaryComponent extends Component {
         <div className="App">
           <div>
             <div class="text-center" >
-              <img src="cropped-parkinsonsfavicon-180x180.png" className="App-logo" alt="logo" />
-              <h1 className="display-10 mb-3">Parkinson's Speech Diary</h1>
+              <img src="icons/android-chrome-192x192.png" className="App-logo" alt="logo" />
+              <h1 className="display-10 mb-3">Speech Diary</h1>
             </div>
             <div className="text-center">
               <div >

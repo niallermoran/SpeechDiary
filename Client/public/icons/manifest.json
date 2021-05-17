@@ -1,0 +1,20 @@
+{
+  "short_name": "Speech Diary",
+  "name": "Speech diary by Niall Moran",
+  "icons": [
+    {
+      "src": "android-chrome-192x192.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "android-chrome-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "theme_color": "#ee2b2b",
+  "background_color": "#ee2b2b",
+  "display": "standalone",
+  "start_url": "."
+}
