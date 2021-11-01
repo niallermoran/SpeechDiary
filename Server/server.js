@@ -18,10 +18,8 @@ const privateKey = process.env.REACT_APP_PRIVATE_KEY;
 const textAnalyticsClient = new TextAnalyticsClient(text_endpoint, new AzureKeyCredential(text_key));
 const path = require("path");
 
-app.use(express.static(path.join(__dirname, 'public')))
-
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
+app.get('/', async (req, res) => {
+    return res.status(200).send({ message: 'API is running. Indiviudal methods must be accessed via a valid access token see https://github.com/niallermoran/SpeechDiary' });
 });
 
 // this method will return an Azure secure token that can be used to stream speech to the Azure speechsdk from the client
