@@ -23,7 +23,7 @@ In order to deploy the solution you will need an Azure Web App that supports nod
 4. Copy the file sample.env to a new file called .env. Ensure that the new file (.env) is added to your git ignore file list and do not update sample.env.
 4. Open the file .env and update the properties based on the values from Azure resources noted in previous section. This file contains secrets used only for development, do not allow this file to end up in your Github account.
 5. In a terminal window type npm run dev. You should see a message saying "listening on port 3400" (or something different if you changed the port number). You may also see an error about no such file or director for index.html. You can ignore this error for now.
-6. To test if the server API is working open a browser and navigate to localhost:3400/api/token. This should return a json file with a token value as well as region and port. If this works then the api is working.
+6. To test if the server API is working open a browser and navigate to localhost:3400. This should return a message indicating the api is working.
 7. To stop the server go back to the terminal window in VS code and hit CTRL-C twice. However, if you want to the test the REACT front end you should leave the server running.
 
 ## Setting up Development Environment - REACT Client
